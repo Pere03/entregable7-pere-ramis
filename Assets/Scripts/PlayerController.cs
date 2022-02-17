@@ -5,59 +5,60 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     private Rigidbody playerRigidbody;
-    [SerializeField] private float jumpForce = 500f;
-    private float MaxYRange = 17f;
+    [SerializeField] private float jumpForce = 350f;
+    
     public bool GameOver;
     public int Counter;
-    private AudioSource Boing;
+    public AudioClip AsBoing;
+    public AudioClip AsBlip;
+    public AudioClip AsBoom;
+    private AudioSource PlayerAudioSource;
+    public ParticleSystem ExplosionParticleSystem;
+    public ParticleSystem FireworkParticleSystem;
+
 
     void Start()
     {
         playerRigidbody = GetComponent<Rigidbody>();
+        PlayerAudioSource = GetComponent<AudioSource>();
         GameOver = false;
-        Boing = GetComponent<AudioSource>();
     }
 
-    // Update is called once per frame
+    
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && !GameOver)
         {
             playerRigidbody.AddForce(Vector3.up * jumpForce);
-            Boing.Play();
-        }
-
-        if (transform.position.y > MaxYRange)
-        {
-            transform.position = new Vector3(transform.position.x, MaxYRange, transform.position.z);
+            PlayerAudioSource.PlayOneShot(AsBoing, 1f);
         }
 
     }
-
-
 
     private void OnCollisionEnter(Collision otherCollider)
     {
-        if (GameOver = true)
+        if (!GameOver)
         {
-            Time.timeScale = 0;
-            Debug.Log("GAME OVER");
-        }
+            if (otherCollider.gameObject.CompareTag("Ground"))
+            {
+                GameOver = true;
+            }
 
-        if (otherCollider.gameObject.CompareTag("Ground"))
-        {
-            GameOver = true;
-        }
+            if (otherCollider.gameObject.CompareTag("Bomb"))
+            {
+                GameOver = true;
+                Destroy(otherCollider.gameObject);
+                PlayerAudioSource.PlayOneShot(AsBoom, 1f);
+                ExplosionParticleSystem.Play();
+            }
 
-        if (otherCollider.gameObject.CompareTag("Obstacle"))
-        {
-            GameOver = true;
-        }
-
-        if (otherCollider.gameObject.CompareTag("Money"))
-        {
-            Destroy(otherCollider.gameObject);
-            Counter += 1;
+            if (otherCollider.gameObject.CompareTag("Money"))
+            {
+                Destroy(otherCollider.gameObject);
+                Counter += 1;
+                PlayerAudioSource.PlayOneShot(AsBlip, 1f);
+                FireworkParticleSystem.Play();
+            }
         }
     }
 }
