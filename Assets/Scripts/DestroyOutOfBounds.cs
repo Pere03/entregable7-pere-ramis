@@ -9,6 +9,8 @@ public class DestroyOutOfBounds : MonoBehaviour
 
     void Update()
     {
+        //Cuando el objeto llegue hacia alguna de las 2 posiciones declaradas, el objeto se destruira
+
         if (transform.position.x > rightLim)
         {
             Destroy(gameObject);
